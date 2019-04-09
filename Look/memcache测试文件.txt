@@ -1,0 +1,10 @@
+vim /usr/local/nginx/html/test.php
+
+<?php
+$memcache=new Memcache;                //创建memcache对象
+$memcache->connect('192.168.2.5',11211) or die ('could not connect!!');
+#该地址为数据库地址
+$memcache->set('key','test');             //定义变量
+$get_values=$memcache->get('key');        //获取变量值
+echo $get_values;
+?>

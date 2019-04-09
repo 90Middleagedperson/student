@@ -1,0 +1,94 @@
+/etc/sysctl.conf	//修改内核
+/etc/libvirt/qemu	//存放虚拟设备的xml文件
+/var/lib/libvirt/images	//前后端盘文件（磁盘镜像文件）
+/etc/sysconfig/network-scripts	//网卡的配置文件
+
+聚合链路---两种模式bond(最多两块网卡)team(八块)
+  team模式    broadcast广播容错
+		roundrobin平衡轮
+		ativebackup主备
+		loadbalance负载均衡
+nmcli connection add con-name team0 type team ifname team0 config '{ "runner":{ "name":"activebackup" } }'
+nmcli connection add con-name team0-p1 type team-slave ifname eth1 master team0
+nmcli connection add con-name team0-p2 type team-slave ifname eth2 master team0
+nmcli con modify team0 ipv4.method manual ipv4.addresses "172.16.3.20/24"  connection.autoconnect yes
+nmcli con modify team0-p1 connection.autoconnect yes
+nmcli con modify team0-p2 connection.autoconnect yes
+nmcli connection up team0
+teamdctl team0 state
+
+nmtui---图形界面配置网卡
+
+DEVICE="eth0"
+ONBOOT="yes"
+NM_CONTROLLED="no"
+TYPE="Ethernet"
+BOOTPROTO="dhcp"
+PERSISTENT_DHCLIENT="yes"
+
+vim ifcfg-eth0
+TYPE=Ethernet
+BOOTPROTO=static / none
+NAME=eth0
+DEVICE=eth0
+ONBOOT=yes
+IPADDR=192.168.4.5
+PREFIX=24
+
+vim ifcfg-lo:0
+DEVICE=lo:0
+IPADDR=192.168.4.15
+NETMASK=255.255.255.255
+NETWORK=192.168.4.15
+BROADCAST=192.168.4.15
+ONBOOT=yes
+NAME=lo:0
+
+vim /etc/sysctl.conf
+#手动写入如下4行内容
+net.ipv4.conf.all.arp_ignore = 1
+net.ipv4.conf.lo.arp_ignore = 1
+net.ipv4.conf.lo.arp_announce = 2
+net.ipv4.conf.all.arp_announce = 2
+#当有arp广播问谁是192.168.4.15时，本机忽略该ARP广播，不做任何回应
+#本机不要向外宣告自己的lo回环地址是192.168.4.15
+sysctl -p	//从指定的文件加载系统参数，如不指定即从/etc/sysctl.conf中加载
+sysctl -a | grep arp
+
+cat <<EOF >>文件
+EOF
+
+https://www.cnblogs.com/Jtianlin/p/4655831.html
+TYPE=Ethernet  
+DEVICE=eth0  
+BOOTPROTO=none/bootp/dhcp/static
+ONBOOT=yes  系统启动时是否激活
+IPADDR=10.0.1.27  
+NETMASK=255.255.255.0  
+GATEWAY=10.0.1.1  
+BROADCAST=10.10.1.255  
+HWADDR=00:0C:29:13:5D:74  
+PEERDNS=yes  是否指定DNS。如果使用DHCP协议，默认为yes
+DNS1=10.0.1.41  
+USERCTL=no 用户权限控制，建议no，非root用户部运行控制该网络
+NM_CONTROLLED=no  是否由Network Manager控制该网络接口，建议设置no
+IPV6INIT=yes  
+IPV6ADDR=FD55:faaf:e1ab:1B0D:10:14:24:106/64  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

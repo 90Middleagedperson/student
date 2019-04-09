@@ -1,0 +1,17 @@
+Varnish服务
+
+yum -y install gcc readline-devel ncurses-devel pcre-devel   //安装软件依赖包
+yum -y install \
+python-docutils-0.11-0.2.20130715svn7687.el7.noarch.rpm         //安装软件依赖包
+useradd -s /sbin/nologin varnish                //创建账户
+tar -xf varnish-5.2.1.tar.gz
+cd varnish-5.2.1
+./configure
+make && make install
+cp  etc/example.vcl   /usr/local/etc/default.vcl
+
+vim  /usr/local/etc/default.vcl
+backend default {
+     .host = "192.168.2.100";	//后端web服务器地址
+     .port = "80";
+ }
